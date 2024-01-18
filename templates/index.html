@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang = "en">
+    <head> 
+        <meta charset="UTF-8">
+        <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+        <title> DevCollab</title>
+
+    </head>
+    <body>
+        <h1> Welcome to DevCollab</h1>
+        <h2>Register</h2>
+        <form action = "{{url_for('register')}}" method = "POST">
+            <label for = "username"> Username</label>
+            <input type = "text" id = "username" name = "username" required>
+            <label for = "password"> Password: </label>
+            <input type = "password" id = "password" name = "password" required>
+            <input type = "submit" value = "Register">
+
+        </form>
+       
+        <h2> Login</h2>
+        <form action="{{ url_for('login') }}" method="POST">
+            <!-- Include the CSRF token in the form -->
+            
+            <label for="login_username">Username</label>
+            <input type="text" id="login_username" name="login_username" required>
+            
+            <label for="login_password">User Password:</label>
+            <input type="password" id="login_password" name="login_password" required>
+            
+            <input type="submit" value="Login">
+        </form>
+        
+    </body>
+
+</html>
