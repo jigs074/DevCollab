@@ -2,9 +2,13 @@
     {
         "username": "Admin",
         "password": "8bb0cf6eb9b17d0f7d22b456f121257dc1254e1f01665370476383ea776df414"
-},
+    },
     {
         "username": "ABCD",
         "password": "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"
+    },
+    {
+        "username": "Jignesh Patel ",
+        "password": "ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f"
     }
 ]

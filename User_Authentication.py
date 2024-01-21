@@ -135,6 +135,25 @@ def blog():
     else:
         return redirect(url_for('home'))
     
+
+@app.route('/all_blog_posts', methods=['GET'])
+def all_blog_posts():
+    if 'username' in session:
+        user_blog_file = f"{session['username']}_blog.json"
+
+        if os.path.exists(user_blog_file):
+            with open(user_blog_file, 'r') as file:
+                user_blog_data = json.load(file)
+        else:
+            user_blog_data = []
+
+        return render_template('all_blog_posts.html', username=session['username'], blog_data=user_blog_data)
+    else:
+        return redirect(url_for('home'))
+    
+    
+    
+    
     
             
 
