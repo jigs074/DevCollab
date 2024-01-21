@@ -1,17 +1,23 @@
-<html lang = "en">
-    <head> 
-        <meta charset="UTF-8">
-        <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
-        <title> DevCollab</title>
+<!DOCTYPE html>
+<html lang="en">
 
-    </head>
-    <body>
-        <h1></h1>
-        <h2>Blog Posts: </h2>
-        <form action = "{{url_for('blogpost')}}" method = "POST">
-            <label for = "blogpost"> Write your blogposts here below: </label>
-            <input type = "text" id = "blogpost" name = "blogpost" width : 2000px required>
-            
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevCollab - Blog</title>
+</head>
 
-        </form>
-        </body>
+<body>
+    <h1>Welcome, {{ username }}!</h1>
+
+    <h2>Write a Blog Post</h2>
+    <form action="{{ url_for('blog') }}" method="POST">
+        <label for="blog_content">Blog Content:</label>
+        <textarea id="blog_content" name="blog_content" rows="4" cols="50" required></textarea>
+        <br>
+        <input type="submit" value="Submit Blog Post">
+    </form>
+</body>
+
+</html>
+
