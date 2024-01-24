@@ -81,15 +81,38 @@
 <body>
     <h1>Welcome, {{ username }}!</h1>
 
-    <form action="{{ url_for('blog') }}" method="POST">
+    <div id="message"></div>
+
+    <form id="blogForm">
         <h2>Write a Blog Post</h2>
         <label for="blog_content">Blog Content:</label>
         <textarea id="blog_content" name="blog_content" rows="4" cols="50" required></textarea>
         <br>
-        <input type="submit" value="Submit Blog Post">
+        <input type="button" value="Submit Blog Post" onclick="submitBlogPost()">
     </form>
 
-    <a href="{{url_for('all_blog_posts')}}">All Blog Posts</a>
+   
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        function submitBlogPost() {
+            var blogContent = $('#blog_content').val();
+
+            $.ajax({
+                url: "{{ url_for('blog') }}",
+                type: "POST", 
+                contentType: "application/json",
+                data: JSON.stringify({ "blog_content": blogContent }),
+                success: function (response) {
+                    $('#message').text(response.message);
+                },
+                error: function (error) {
+                    $('#message').text(error.responseJSON.error);
+                }
+            });
+        }
+    </script>
 </body>
+
 
 </html>
