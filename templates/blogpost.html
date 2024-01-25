@@ -91,7 +91,7 @@
         <input type="button" value="Submit Blog Post" onclick="submitBlogPost()">
     </form>
 
-   
+    <a href="{{ url_for('blog.display_blog') }}">All Blog Posts</a>
 
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script>
@@ -99,7 +99,7 @@
             var blogContent = $('#blog_content').val();
 
             $.ajax({
-                url: "{{ url_for('blog') }}",
+                url: "{{ url_for('blog.blog') }}",
                 type: "POST", 
                 contentType: "application/json",
                 data: JSON.stringify({ "blog_content": blogContent }),

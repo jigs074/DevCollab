@@ -1,87 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>All Blog Posts</title>
-
+    <title>User Blog Posts</title>
     <style>
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: Arial, sans-serif;
             background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
+            margin: 20px;
         }
-
-        h1 {
-            color: #333;
-        }
-
-        ul {
-            list-style-type: none;
-            padding: 0;
-            margin: 20px 0;
-        }
-
-        li {
+        #blog-container {
+            max-width: 800px;
+            margin: 0 auto;
             background-color: #fff;
-            border: 1px solid #ddd;
+            padding: 20px;
             border-radius: 8px;
-            margin: 10px 0;
-            padding: 15px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
         }
-
-        li p {
-            margin: 8px 0;
+        .blog-post {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
         }
-
-        a {
-            text-decoration: none;
-            color: #333;
-            font-weight: bold;
-            border: 2px solid #4caf50;
-            padding: 10px 15px;
-            border-radius: 4px;
-            transition: background-color 0.3s;
-        }
-
-        a:hover {
-            background-color: #4caf50;
-            color: #fff;
-        }
-
-        p {
-            color: #555;
+        .timestamp {
+            color: #888;
         }
     </style>
 </head>
-
 <body>
-    <h1>All Blog Posts by {{ username }}</h1>
+    <div id="blog-container"></div>
 
-    {% if blog_data %}
-        <ul>
-            {% for post in blog_data %}
-                <li>
-                    <p>{{ post.timestamp }}</p>
-                    <p>{{ post.content }}</p>
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No blog posts yet.</p>
-    {% endif %}
+    <script>
+        // Function to fetch JSON data based on the username
+        function fetchUserData(username, callback) {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var userData = JSON.parse(xhr.responseText);
+                    callback(userData);
+                }
+            };
+            xhr.open("GET", '/all_blog_posts', true);
+            xhr.send();
+        }
 
-    <a href="{{ url_for('blog') }}">Back to Blog</a>
+        // Function to display blog posts
+        function displayBlogPosts(data) {
+            var container = document.getElementById('blog-container');
+            var html = '<h2>Blog Posts by ' + data.username + '</h2>';
+            
+            // Loop through the blog posts and create HTML
+            data.blog_data.forEach(function(post) {
+                html += '<div class="blog-post">';
+                html += '<p>' + post.content + '</p>';
+                html += '<p class="timestamp">' + post.timestamp + '</p>';
+                html += '</div>';
+            });
+
+            container.innerHTML = html;
+        }
+
+       
+        fetchUserData("", displayBlogPosts);  
+    </script>
 </body>
-
 </html>

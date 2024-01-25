@@ -1,12 +1,11 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, Blueprint
 
 import json, hashlib, getpass, os , pyperclip, sys
 from cryptography.fernet import Fernet
 from datetime import datetime 
 
-app = Flask(__name__)
-app.secret_key = os.urandom(24)
-# Function for hashing the password 
+auth_bp = Blueprint('auth',__name__)
+
 def hash_password(password):
     sha256 = hashlib.sha256()
     sha256.update(password.encode())
@@ -32,21 +31,9 @@ def decrypt_password(cipher, encrypted_password):
     return cipher.decrypt(encrypted_password.encode()).decode()
 
 
-
-
-
-users = []
-@app.route('/')
-def home():
-    return render_template('index.html')
-
-
-
-    
-
-@app.route('/register',methods=['GET', 'POST'])
+@auth_bp.route('/register',methods=['GET', 'POST'])
 # Function to register you.
-@app.route('/register', methods=['GET', 'POST'])
+@auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
         username = request.form.get('username')
@@ -76,7 +63,7 @@ def register():
     return render_template('index.html')
 
 # Function to log you in.
-@app.route('/login', methods=['POST'])
+@auth_bp.route('/login', methods=['POST'])
 def login():
     try:
       
@@ -91,7 +78,7 @@ def login():
             if user_data.get('username') == username and user_data.get('password') == entered_password_hash:
                 session['username'] = username 
                 print("Login Successfull..")
-                return redirect(url_for('blog'))
+                return redirect(url_for('blog.blog'))
                 
         else:
             print("Invalid Login Credentials")
@@ -110,49 +97,3 @@ def login():
         print("\n[-] You have not registered. Please do that.\n")
 
     return render_template('index.html')  # This is outside the try-except block
-
-    
-
-
-@app.route('/blog', methods=['GET', 'POST'])
-def blog():
-    if request.method == 'GET':
-        if 'username' in session:
-            return render_template('blogpost.html', username=session['username'])
-        else:
-            return jsonify({'error': 'User not logged in'}), 401
-    elif request.method == 'POST':
-        if 'username' in session:
-            
-            user_blog_file = f"{session['username']}_blog.json"
-            # blog_content = request.form.get('blog_content')
-            blog_content = request.json.get('blog_content')
-            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            new_post = {'timestamp': timestamp,'content':blog_content}
-            if os.path.exists(user_blog_file):
-                with open(user_blog_file, 'r') as file:
-                    user_blog_data = json.load(file)
-            else:
-                user_blog_data = []
-                
-            user_blog_data.append(new_post)
-            
-            with open(user_blog_file, "w") as file:
-                json.dump(user_blog_data, file, indent =4)
-                
-            return jsonify({'message': 'Blog post submitted successfully'})
-        else:
-            return jsonify({'error': 'User not logged in'}), 401
-
-    
-    
-                
-
-if __name__ == "__main__":
-    app.run(debug = True)
-    
-    
-
-
-
-    
