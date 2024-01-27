@@ -15,10 +15,6 @@ app.register_blueprint(blog_bp)
 
 # Function for hashing the password 
 
-
-
-
-
 users = []
 @app.route('/')
 def home():

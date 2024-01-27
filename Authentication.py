@@ -4,6 +4,22 @@ import json, hashlib, getpass, os , pyperclip, sys
 from cryptography.fernet import Fernet
 from datetime import datetime 
 
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
+
+uri = "mongodb+srv://ericwengew:RrOhGb7guZDqkmTh@cluster0.f7b0fmd.mongodb.net/?retryWrites=true&w=majority"
+# Create a new client and connect to the server
+client = MongoClient(uri, server_api=ServerApi('1'))
+
+# Send a ping to confirm a successful connection
+try:
+    client.admin.command('ping')
+    print("Pinged your deployment. You successfully connected to MongoDB!")
+except Exception as e:
+    print(e)
+
+db = client["User_Database"]
+collection = db["User_Collection"]
 auth_bp = Blueprint('auth',__name__)
 
 def hash_password(password):
@@ -52,6 +68,8 @@ def register():
             # Handle the case where the file doesn't exist yet
             existing_data = []
 
+        user_data['_id'] = None
+        collection.insert_one(user_data)
         existing_data.append(user_data)
 
         with open(file_name, 'w') as file:

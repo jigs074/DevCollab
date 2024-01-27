@@ -4,9 +4,23 @@ from flask import Flask, render_template, request, redirect, url_for, session, j
 import json, hashlib, getpass, os , pyperclip, sys
 from cryptography.fernet import Fernet
 from datetime import datetime 
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
 
 blog_bp = Blueprint('blog',__name__)
 
+uri = "mongodb+srv://ericwengew:RrOhGb7guZDqkmTh@cluster0.f7b0fmd.mongodb.net/?retryWrites=true&w=majority"
+# Create a new client and connect to the server
+client = MongoClient(uri, server_api=ServerApi('1'))
+
+# Send a ping to confirm a successful connection
+try:
+    client.admin.command('ping')
+    print("Pinged your deployment. You successfully connected to MongoDB!")
+except Exception as e:
+    print(e)
+
+db = client["Blogpost_Database"]
 
 @blog_bp.route('/blog', methods=['GET', 'POST'])
 def blog():
@@ -28,7 +42,13 @@ def blog():
                     user_blog_data = json.load(file)
             else:
                 user_blog_data = []
-                
+            
+            #blogpost database
+            username = session['username']
+            collection = db[username]
+
+            new_post['_id'] = None ## fix '_id' field
+            collection.insert_one(new_post) ##insert new post into database collection
             user_blog_data.append(new_post)
             
             with open(user_blog_file, "w") as file:
