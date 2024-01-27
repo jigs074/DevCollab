@@ -81,3 +81,59 @@ def all_blog_posts():
 @blog_bp.route('/display_blog', methods=['GET'])
 def display_blog():
     return render_template('all_blog_posts.html')
+
+
+@blog_bp.route('/edit_blog_post/<int:post_index>', methods=['PUT'])
+def edit_blog_post(post_index):
+    if 'username' in session:
+        user_blog_file = f"{session['username']}_blog.json"
+
+        if os.path.exists(user_blog_file):
+            with open(user_blog_file, 'r') as file:
+                user_blog_data = json.load(file)
+
+            if post_index < len(user_blog_data):
+                # Assuming the request data contains the updated blog post content
+                updated_content = request.get_json()
+                
+                # Update the blog post with the new content
+                user_blog_data[post_index]['content'] = updated_content.get('content', '')
+
+                # Save the updated data back to the file
+                with open(user_blog_file, 'w') as file:
+                    json.dump(user_blog_data, file)
+
+                return jsonify({'message': 'Blog post updated successfully'})
+            else:
+                return jsonify({'error': 'Invalid blog post index'})
+        else:
+            return jsonify({'error': 'User blog file not found'})
+    else:
+        return jsonify({'error': 'User not logged in'})
+
+
+
+@blog_bp.route('/delete_blog_post/<int:post_index>', methods=['DELETE'])
+def delete_blog_post(post_index):
+    if 'username' in session:
+        user_blog_file = f"{session['username']}_blog.json"
+
+        if os.path.exists(user_blog_file):
+            with open(user_blog_file, 'r') as file:
+                user_blog_data = json.load(file)
+
+            if post_index < len(user_blog_data):
+                # Remove the specified blog post
+                del user_blog_data[post_index]
+
+                # Save the updated data back to the file
+                with open(user_blog_file, 'w') as file:
+                    json.dump(user_blog_data, file)
+
+                return jsonify({'message': 'Blog post deleted successfully'})
+            else:
+                return jsonify({'error': 'Invalid blog post index'})
+        else:
+            return jsonify({'error': 'User blog file not found'})
+    else:
+        return jsonify({'error': 'User not logged in'})

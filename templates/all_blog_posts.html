@@ -27,6 +27,10 @@
         .timestamp {
             color: #888;
         }
+        .edit-form {
+            display: none;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -52,18 +56,70 @@
             var html = '<h2>Blog Posts by ' + data.username + '</h2>';
             
             // Loop through the blog posts and create HTML
-            data.blog_data.forEach(function(post) {
+            data.blog_data.forEach(function(post, index) {
                 html += '<div class="blog-post">';
                 html += '<p>' + post.content + '</p>';
                 html += '<p class="timestamp">' + post.timestamp + '</p>';
+                html += '<button onclick="showEditForm(' + index + ')">Edit</button>';
+                html += '<button onclick="deleteBlogPost(' + index + ')">Delete</button>';
+                html += '<div id="edit-form-' + index + '" class="edit-form">';
+                html += '<form onsubmit="submitEditForm(event, ' + index + ')">';
+                html += '<textarea name="editedContent" placeholder="Edit the content"></textarea>';
+                html += '<button type="submit">Save</button>';
+                html += '</form>';
+                html += '</div>';
                 html += '</div>';
             });
 
             container.innerHTML = html;
         }
 
-       
-        fetchUserData("", displayBlogPosts);  
+        // Function to show the edit form
+        function showEditForm(index) {
+            var editForm = document.getElementById('edit-form-' + index);
+            editForm.style.display = 'block';
+        }
+
+        // Function to submit the edit form
+        function submitEditForm(event, index) {
+            event.preventDefault();
+            var editedContent = event.target.elements.editedContent.value;
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        // Handle success, e.g., update the UI
+                        fetchUserData("", displayBlogPosts);
+                    } else {
+                        // Handle error
+                        console.error('Error updating blog post');
+                    }
+                }
+            };
+            xhr.open("PUT", '/edit_blog_post/' + index, true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(JSON.stringify({ content: editedContent }));
+        }
+
+        // Function to delete a blog post
+        function deleteBlogPost(index) {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        // Handle success, e.g., update the UI
+                        fetchUserData("", displayBlogPosts);
+                    } else {
+                        // Handle error
+                        console.error('Error deleting blog post');
+                    }
+                }
+            };
+            xhr.open("DELETE", '/delete_blog_post/' + index, true);
+            xhr.send();
+        }
+
+        fetchUserData("", displayBlogPosts);
     </script>
 </body>
 </html>
