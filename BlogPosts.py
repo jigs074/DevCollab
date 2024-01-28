@@ -4,23 +4,12 @@ from flask import Flask, render_template, request, redirect, url_for, session, j
 import json, hashlib, getpass, os , pyperclip, sys
 from cryptography.fernet import Fernet
 from datetime import datetime 
-from pymongo.mongo_client import MongoClient
+
+from Database import import_from_mongodb, export_to_mongodb, delete_field, edit_field
+from pymongo import MongoClient, InsertOne
 from pymongo.server_api import ServerApi
 
 blog_bp = Blueprint('blog',__name__)
-
-uri = "mongodb+srv://ericwengew:RrOhGb7guZDqkmTh@cluster0.f7b0fmd.mongodb.net/?retryWrites=true&w=majority"
-# Create a new client and connect to the server
-client = MongoClient(uri, server_api=ServerApi('1'))
-
-# Send a ping to confirm a successful connection
-try:
-    client.admin.command('ping')
-    print("Pinged your deployment. You successfully connected to MongoDB!")
-except Exception as e:
-    print(e)
-
-db = client["Blogpost_Database"]
 
 @blog_bp.route('/blog', methods=['GET', 'POST'])
 def blog():
@@ -43,12 +32,8 @@ def blog():
             else:
                 user_blog_data = []
             
-            #blogpost database
-            username = session['username']
-            collection = db[username]
-
-            new_post['_id'] = None ## fix '_id' field
-            collection.insert_one(new_post) ##insert new post into database collection
+            export_to_mongodb(session['username'], new_post)
+            new_post['_id'] = str(new_post.get('_id',''))
             user_blog_data.append(new_post)
             
             with open(user_blog_file, "w") as file:
@@ -63,14 +48,16 @@ def blog():
 @blog_bp.route('/all_blog_posts', methods=['GET'])
 def all_blog_posts():
     if 'username' in session:
-        user_blog_file = f"{session['username']}_blog.json"
+        #import_from_mongodb(username)
+        user_blog_file = f"{session['username']}_blog.json" 
+
+        username = session['username']
 
         if os.path.exists(user_blog_file):
             with open(user_blog_file, 'r') as file:
                 user_blog_data = json.load(file)
         else:
             user_blog_data = []
-        username = session['username']
         response_data = {'username':username, 'blog_data': user_blog_data}
         data =  jsonify(response_data)
         return data 
@@ -98,7 +85,7 @@ def edit_blog_post(post_index):
                 
                 # Update the blog post with the new content
                 user_blog_data[post_index]['content'] = updated_content.get('content', '')
-
+                #edit_field(session['username'], user_blog_data[post_index])
                 # Save the updated data back to the file
                 with open(user_blog_file, 'w') as file:
                     json.dump(user_blog_data, file)
@@ -125,7 +112,7 @@ def delete_blog_post(post_index):
             if post_index < len(user_blog_data):
                 # Remove the specified blog post
                 del user_blog_data[post_index]
-
+                #delete_field(session['username'],user_blog_data[post_index])
                 # Save the updated data back to the file
                 with open(user_blog_file, 'w') as file:
                     json.dump(user_blog_data, file)

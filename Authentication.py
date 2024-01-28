@@ -4,22 +4,8 @@ import json, hashlib, getpass, os , pyperclip, sys
 from cryptography.fernet import Fernet
 from datetime import datetime 
 
-from pymongo.mongo_client import MongoClient
-from pymongo.server_api import ServerApi
+from Database import export_to_mongodb, import_from_mongodb
 
-uri = "mongodb+srv://ericwengew:RrOhGb7guZDqkmTh@cluster0.f7b0fmd.mongodb.net/?retryWrites=true&w=majority"
-# Create a new client and connect to the server
-client = MongoClient(uri, server_api=ServerApi('1'))
-
-# Send a ping to confirm a successful connection
-try:
-    client.admin.command('ping')
-    print("Pinged your deployment. You successfully connected to MongoDB!")
-except Exception as e:
-    print(e)
-
-db = client["User_Database"]
-collection = db["User_Collection"]
 auth_bp = Blueprint('auth',__name__)
 
 def hash_password(password):
@@ -58,7 +44,7 @@ def register():
         hashed_password = hash_password(password)
         user_data = {'username': username, 'password': hashed_password}
         file_name = 'user_data.json'
-
+        export_to_mongodb("User_Database", user_data)
         try:
             with open(file_name, 'r') as file:
                 existing_data = json.load(file)
@@ -69,7 +55,6 @@ def register():
             existing_data = []
 
         user_data['_id'] = None
-        collection.insert_one(user_data)
         existing_data.append(user_data)
 
         with open(file_name, 'w') as file:
@@ -89,6 +74,7 @@ def login():
         print(username)
         entered_password = request.form.get('login_password')
         entered_password_hash = hash_password(entered_password)
+        #user_data_list = import_from_mongodb("User_Database")
         with open('user_data.json', 'r') as file:
             user_data_list = json.load(file)
             
