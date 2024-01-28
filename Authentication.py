@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, Blueprint
 
-import json, hashlib, getpass, os , pyperclip, sys
+import json, hashlib, getpass, os , sys
 from cryptography.fernet import Fernet
 from datetime import datetime 
 
