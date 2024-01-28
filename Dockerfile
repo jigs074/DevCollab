@@ -17,5 +17,5 @@ EXPOSE 80
 ENV NAME World
 
 # Run user_authentication.py when the container launches
-CMD ["python", "-u", "./User_Authentication.py"]
+CMD ["python", "-u", "./py"]
 
