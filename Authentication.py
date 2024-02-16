@@ -4,7 +4,10 @@ import json, hashlib, getpass, os , sys
 from cryptography.fernet import Fernet
 from datetime import datetime 
 
-from Database import export_to_mongodb, import_from_mongodb
+from Database import export_to_mongodb, import_from_mongodb, user_exists
+
+userCredentialsJson = open('user_data.json')
+userDB = json.load(userCredentialsJson)
 
 auth_bp = Blueprint('auth',__name__)
 
@@ -12,6 +15,22 @@ def hash_password(password):
     sha256 = hashlib.sha256()
     sha256.update(password.encode())
     return sha256.hexdigest()
+
+def append_to_json(user_data):
+    file_name = 'user_data.json'
+    try:
+        with open(file_name, 'r') as file:
+            existing_data = json.load(file)
+    except FileNotFoundError:
+        existing_data = []
+
+    # Check if the user already exists in JSON
+    usernames = {user['username'] for user in existing_data}
+    if user_data['username'] not in usernames:
+        existing_data.append(user_data)
+
+        with open(file_name, 'w') as file:
+            json.dump(existing_data, file, indent=4)
 
 
 # Function for generating the secret key 
@@ -43,25 +62,28 @@ def register():
 
         hashed_password = hash_password(password)
         user_data = {'username': username, 'password': hashed_password}
-        file_name = 'user_data.json'
-        export_to_mongodb("User_Database", user_data)
-        try:
-            with open(file_name, 'r') as file:
-                existing_data = json.load(file)
-                if not isinstance(existing_data, list):
-                    existing_data = []
-        except FileNotFoundError:
-            # Handle the case where the file doesn't exist yet
-            existing_data = []
+        
+        if user_exists(user_data):
+            print("\n[+] User Already Exists")
+        
+        else:
+            file_name = 'user_data.json'
+            export_to_mongodb("User_Database",user_data)
+            try:
+                with open(file_name, 'r') as file:
+                    existing_data = json.load(file)
+                    if not isinstance(existing_data, list):
+                        existing_data = []
+            except FileNotFoundError:
+                # Handle the case where the file doesn't exist yet
+                existing_data = []
 
-        user_data['_id'] = None
-        existing_data.append(user_data)
+            user_data['_id'] = None
+            existing_data.append(user_data)
 
-        with open(file_name, 'w') as file:
-            json.dump(existing_data, file, indent=4)
-            print("\n[+] Registration complete!!\n")
-
-       
+            with open(file_name, 'w') as file:
+                json.dump(existing_data, file, indent=4)
+                print("\n[+] Registration complete!!\n")
 
     return render_template('index.html')
 

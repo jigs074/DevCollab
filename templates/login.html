@@ -75,54 +75,26 @@
 <body>
     <h1>Welcome to DevCollab</h1>
 
+    <!-- Your login form -->
     <div class="login-form">
         <h2>Login</h2>
-        <form action="{{url_for('auth.login')}}" method="POST">
+        <form action="{{ url_for('auth.login') }}" method="POST">
             <label for="login_username">Username</label>
             <input type="text" id="login_username" name="login_username" required>
             <label for="login_password">Password:</label>
             <input type="password" id="login_password" name="login_password" required>
             <input type="submit" value="Login">
         </form>
-
         <p class="register-link" onclick="showRegisterForm()">New user? Register now.</p>
     </div>
 
-    <div class="register-form" style="display: none;">
-        <h2>Register</h2>
-        <form action="{{url_for('auth.register')}}" method="POST">
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username" required>
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
-            <input type="submit" value="Register">
-        </form>
-
-        <p class="register-link" onclick="showLoginForm()">Already have an account? Login here.</p>
-    </div>
-
+    <!-- Your other content and scripts -->
     <script>
+        // Function to show the register form
         function showRegisterForm() {
             document.querySelector('.login-form').style.display = 'none';
             document.querySelector('.register-form').style.display = 'block';
         }
-
-        function showLoginForm() {
-            document.querySelector('.login-form').style.display = 'block';
-            document.querySelector('.register-form').style.display = 'none';
-        }
-    </script>
-
-    <button onclick="checkStatus()">Check status</button>
-
-    <script>
-        function checkStatus() {
-            fetch('/check_status', { method: 'OPTIONS' })
-                .then(response => response.json())
-                .then(data => alert(JSON.stringify(data, null, 2)))
-                .catch(error => console.error('Error:', error));
-        }
     </script>
 </body>
-
 </html>
