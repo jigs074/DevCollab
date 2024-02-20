@@ -88,7 +88,7 @@
         <label for="blog_content">Blog Content:</label>
         <textarea id="blog_content" name="blog_content" rows="4" cols="50" required></textarea>
         <br>
-        <input type="submit" value="Submit Blog Post" onclick="submitBlogPost()">
+        <input type="button" value="Submit Blog Post" onclick="submitBlogPost()">
     </form>
 
     <a href="{{ url_for('blog.display_blog') }}">All Blog Posts</a>
@@ -97,11 +97,12 @@
     <script>
         function submitBlogPost() {
             var blogContent = $('#blog_content').val();
-    
+
             $.ajax({
                 url: "{{ url_for('blog.blog') }}",
                 type: "POST", 
-                data: { "blog_content": blogContent }, // Send form data instead of JSON
+                contentType: "application/json",
+                data: JSON.stringify({ "blog_content": blogContent }),
                 success: function (response) {
                     $('#message').text(response.message);
                 },
@@ -111,7 +112,6 @@
             });
         }
     </script>
-    
 </body>
 
 

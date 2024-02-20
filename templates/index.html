@@ -113,16 +113,16 @@
         }
     </script>
 
-    <button onclick="checkStatus()">Check status</button>
+<button onclick="checkStatus()">Check status</button>
 
-    <script>
-        function checkStatus() {
-            fetch('/check_status', { method: 'OPTIONS' })
-                .then(response => response.json())
-                .then(data => alert(JSON.stringify(data, null, 2)))
-                .catch(error => console.error('Error:', error));
-        }
-    </script>
+<script>
+    function checkStatus() {
+        fetch('/check_status', { method: 'OPTIONS' })
+            .then(response => response.json())
+            .then(data => alert(JSON.stringify(data, null, 2)))
+            .catch(error => console.error('Error:', error));
+    }
+</script>
 </body>
 
 </html>

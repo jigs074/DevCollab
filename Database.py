@@ -1,11 +1,9 @@
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from flask import Flask, request, jsonify, json, Blueprint
-import pymongo
 uri = "mongodb://localhost:27017"
 # Create a new client and connect to the server
-client = MongoClient(uri) #server_api=ServerApi('1'))
-
+client = MongoClient(uri, server_api=ServerApi('1'))
 
 # Send a ping to confirm a successful connection
 try:
@@ -38,17 +36,3 @@ def import_from_mongodb(username): #import as json file
 
     with open('data.json','w') as f:
         f.write(json_data)
-        
-def user_exists(username):
-    # Check if the username exists in MongoDB
-    collection = db["User_Database"]
-    existing_user_mongodb = collection.find_one({'username': username})
-    
-    # Check if the username exists in the JSON file
-    with open('user_data.json', 'r') as file:
-        existing_data = json.load(file)
-    usernames = {user['username'] for user in existing_data}
-
-    #return existing_user_mongodb is not None or username in usernames
-    return jsonify({'message': 'Username already exists'})
-

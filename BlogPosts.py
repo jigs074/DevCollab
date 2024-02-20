@@ -1,12 +1,13 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, Blueprint
-import json
-import os
+
+import json, hashlib, getpass, os , sys
+from cryptography.fernet import Fernet
 from datetime import datetime 
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from Database import *
 
-blog_bp = Blueprint('blog', __name__)
+blog_bp = Blueprint('blog',__name__)
 
 uri = "mongodb://localhost:27017"
 # Create a new client and connect to the server
@@ -29,34 +30,41 @@ def blog():
         else:
             return jsonify({'error': 'User not logged in'}), 401
     elif request.method == 'POST':
-        if 'username' in session:
-            user_blog_file = f"{session['username']}_blog.json"
-           
-            blog_content = request.form.get('blog_content')  # Use form data instead of JSON
-            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            new_post = {'timestamp': timestamp, 'content': blog_content}
-            
-            # Insert new post into MongoDB collection
-            username = session['username']
-            collection = db[username]
-            collection.insert_one(new_post)
-            
-            # Append new post to user's blog file
-            if os.path.exists(user_blog_file):
-                with open(user_blog_file, 'r') as file:
+       if 'username' in session:
+        
+        user_blog_file = f"{session['username']}_blog.json"
+       
+        blog_content = request.json.get('blog_content')
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        new_post = {'timestamp': timestamp,'content':blog_content}
+        user_blog_data = []
+        
+        # Load existing data from the file if it exists and is not empty
+        if os.path.exists(user_blog_file) and os.path.getsize(user_blog_file) > 0:
+            with open(user_blog_file, 'r') as file:
+                try:
                     user_blog_data = json.load(file)
-            else:
-                user_blog_data = []
-                
+                except json.JSONDecodeError as e:
+                    return jsonify({'error': f'Error loading JSON: {e}'}), 500
+            
+        # Insert new post into MongoDB collection
+        try:
+            collection = db[session['username']]
+            result = collection.insert_one(new_post)
+            new_post['_id'] = str(new_post['_id'])
+            ##insert new post into database collection
             user_blog_data.append(new_post)
             
+            # Write the updated data back to the file
             with open(user_blog_file, "w") as file:
                 json.dump(user_blog_data, file, indent=4)
-                
+            
             return jsonify({'message': 'Blog post submitted successfully'})
-        else:
-            return jsonify({'error': 'User not logged in'}), 401
-
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+    else:
+        return jsonify({'error': 'User not logged in'}), 401
+    
 
 @blog_bp.route('/edit_blog_post/<int:post_index>', methods=['PATCH'])
 def patch_blog_post(post_index):
@@ -90,6 +98,7 @@ def patch_blog_post(post_index):
     else:
         return jsonify({'error': 'User not logged in'})
 
+    
 @blog_bp.route('/all_blog_posts', methods=['GET'])
 def all_blog_posts():
     if 'username' in session:
@@ -100,16 +109,18 @@ def all_blog_posts():
                 user_blog_data = json.load(file)
         else:
             user_blog_data = []
-            
         username = session['username']
-        response_data = {'username': username, 'blog_data': user_blog_data}
-        return jsonify(response_data)
+        response_data = {'username':username, 'blog_data': user_blog_data}
+        data =  jsonify(response_data)
+        return data 
+        
     else:
         return redirect(url_for('home'))
                 
 @blog_bp.route('/display_blog', methods=['GET'])
 def display_blog():
     return render_template('all_blog_posts.html')
+
 
 @blog_bp.route('/edit_blog_post/<int:post_index>', methods=['PUT'])
 def edit_blog_post(post_index):
@@ -138,6 +149,8 @@ def edit_blog_post(post_index):
             return jsonify({'error': 'User blog file not found'})
     else:
         return jsonify({'error': 'User not logged in'})
+
+
 
 @blog_bp.route('/delete_blog_post/<int:post_index>', methods=['DELETE'])
 def delete_blog_post(post_index):
